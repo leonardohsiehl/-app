@@ -3,1239 +3,717 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>打卡表加班 / 遲到計算器</title>
+  <title>打卡表快速計算</title>
   <style>
     :root {
-      --bg: #f6f2ea;
-      --card: #fffaf2;
-      --ink: #24211d;
-      --muted: #7d7467;
-      --line: #ded2bf;
-      --brand: #d66a1f;
-      --brand-dark: #9f4311;
-      --green: #0f7b55;
-      --red: #b94435;
-      --blue: #1f5d8b;
-      --shadow: 0 10px 28px rgba(42, 31, 18, 0.12);
-      --radius: 18px;
+      --bg: #f7f2e8;
+      --paper: #fffaf1;
+      --ink: #27221c;
+      --muted: #7b7164;
+      --line: #e3d5bf;
+      --brand: #c8641b;
+      --brand2: #8c3b10;
+      --green: #176f4f;
+      --blue: #1f5b86;
+      --red: #ad3f35;
+      --shadow: 0 16px 36px rgba(48, 34, 20, .14);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(214,106,31,0.13), transparent 34rem),
-        linear-gradient(180deg, #fbf8f1 0%, var(--bg) 100%);
+        radial-gradient(circle at top left, rgba(200,100,27,.18), transparent 28rem),
+        linear-gradient(180deg, #fffdf8, var(--bg));
       color: var(--ink);
     }
 
-    header {
-      padding: 24px 18px 12px;
-      max-width: 1180px;
+    .app {
+      width: min(720px, calc(100% - 28px));
       margin: 0 auto;
+      padding: 26px 0 46px;
     }
 
-    .title-row {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+    .hero {
+      margin-bottom: 18px;
+      text-align: center;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(24px, 4vw, 40px);
-      letter-spacing: 0.02em;
+      font-size: clamp(28px, 7vw, 46px);
+      letter-spacing: .02em;
+      line-height: 1.1;
     }
 
-    .subtitle {
+    .sub {
       color: var(--muted);
-      margin: 8px 0 0;
+      margin: 10px auto 0;
       line-height: 1.55;
-      max-width: 760px;
+      max-width: 560px;
+      font-size: 15px;
     }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.65);
-      color: var(--brand-dark);
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    main {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 12px 18px 40px;
-      display: grid;
-      gap: 18px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 0.95fr 1.05fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    @media (max-width: 920px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-
-    .panel {
-      background: rgba(255, 250, 242, 0.92);
-      border: 1px solid rgba(222, 210, 191, 0.9);
-      border-radius: var(--radius);
+    .card {
+      background: rgba(255,250,241,.94);
+      border: 1px solid rgba(227,213,191,.92);
+      border-radius: 28px;
       box-shadow: var(--shadow);
+      padding: 20px;
       overflow: hidden;
     }
 
-    .panel-header {
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--line);
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 540px) {
+      .actions { grid-template-columns: 1fr; }
+    }
+
+    .file-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      min-height: 72px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      color: var(--brand2);
+      font-weight: 900;
+      font-size: 18px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    .file-btn:first-child {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+      box-shadow: 0 8px 20px rgba(200,100,27,.28);
+    }
+
+    .file-btn:hover { transform: translateY(-1px); }
+
+    input[type="file"] { display: none; }
+
+    .rule {
+      margin: 14px 0 0;
+      color: #675a4d;
+      font-size: 13px;
+      line-height: 1.6;
+      background: #fff4e7;
+      border-left: 4px solid var(--brand);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+
+    .preview {
+      display: none;
+      margin-top: 16px;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #fff;
+      max-height: 440px;
+    }
+
+    .preview img {
+      width: 100%;
+      max-height: 440px;
+      display: block;
+      object-fit: contain;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 16px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 4px solid #eadbc7;
+      border-top-color: var(--brand);
+      margin: 0 auto 10px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .progress {
+      color: var(--brand2);
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .result {
+      display: none;
+      margin-top: 16px;
+      background: #fffdf8;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 18px;
+    }
+
+    .name {
+      font-size: 22px;
+      font-weight: 950;
+      margin-bottom: 14px;
       display: flex;
       justify-content: space-between;
       gap: 12px;
       align-items: center;
       flex-wrap: wrap;
-      background: rgba(255,255,255,0.45);
     }
 
-    .panel h2 {
-      margin: 0;
-      font-size: 18px;
-      letter-spacing: 0.02em;
-    }
-
-    .panel-body {
-      padding: 18px;
-    }
-
-    .small {
-      font-size: 13px;
+    .badge {
+      font-size: 12px;
       color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .rule-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    @media (max-width: 580px) {
-      .rule-grid { grid-template-columns: 1fr; }
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      color: #51483f;
-      margin-bottom: 6px;
-    }
-
-    input, textarea, select {
-      width: 100%;
       border: 1px solid var(--line);
-      background: #fffdf9;
-      border-radius: 12px;
-      padding: 11px 12px;
-      font: inherit;
-      color: var(--ink);
-      outline: none;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #fff8ee;
+      font-weight: 800;
     }
 
-    input:focus, textarea:focus, select:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(214, 106, 31, 0.14);
-    }
-
-    textarea {
-      min-height: 160px;
-      resize: vertical;
-      line-height: 1.55;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      font-size: 14px;
-    }
-
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
+    .numbers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      align-items: center;
+    }
+
+    @media (max-width: 620px) {
+      .numbers { grid-template-columns: 1fr; }
+    }
+
+    .num-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fffaf1;
+      padding: 15px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .value {
+      font-size: 38px;
+      font-weight: 950;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .green { color: var(--green); }
+    .blue { color: var(--blue); }
+    .red { color: var(--red); }
+
+    .copy-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
       margin-top: 14px;
+    }
+
+    @media (max-width: 540px) {
+      .copy-row { grid-template-columns: 1fr; }
     }
 
     button {
       border: 0;
-      cursor: pointer;
-      border-radius: 12px;
-      padding: 11px 14px;
+      border-radius: 16px;
+      padding: 13px 14px;
       font: inherit;
-      font-weight: 800;
+      font-weight: 900;
+      cursor: pointer;
       background: var(--brand);
       color: white;
-      box-shadow: 0 4px 14px rgba(214, 106, 31, 0.26);
-      transition: transform 0.1s ease, opacity 0.1s ease;
     }
-
-    button:hover { transform: translateY(-1px); }
-    button:active { transform: translateY(0); }
 
     button.secondary {
-      background: #fff8ee;
-      color: var(--brand-dark);
+      background: #fff4e7;
+      color: var(--brand2);
       border: 1px solid var(--line);
-      box-shadow: none;
     }
 
-    button.ghost {
-      background: transparent;
-      color: var(--muted);
-      border: 1px dashed var(--line);
-      box-shadow: none;
-    }
-
-    button.danger {
-      background: #fff2ef;
+    .error {
+      display: none;
+      margin-top: 16px;
+      border-radius: 20px;
+      background: #fff0ed;
+      border: 1px solid #efc4bd;
       color: var(--red);
-      border: 1px solid #ecc6bf;
-      box-shadow: none;
+      padding: 14px;
+      line-height: 1.55;
+      font-weight: 750;
     }
 
-    button.blue {
-      background: #e9f3fb;
-      color: var(--blue);
-      border: 1px solid #c9dceb;
-      box-shadow: none;
-    }
-
-    .upload-box {
-      border: 2px dashed #d7c7b2;
-      border-radius: 16px;
-      background: #fffdf8;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .preview-wrap {
+    details {
       margin-top: 14px;
-      display: none;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      background: white;
-      max-height: 360px;
-    }
-
-    .preview-wrap img {
-      width: 100%;
-      display: block;
-      object-fit: contain;
-      max-height: 360px;
-    }
-
-    .person-card {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      background: #fffdf8;
-      margin-bottom: 14px;
-    }
-
-    .person-top {
-      display: grid;
-      grid-template-columns: 0.9fr 1.4fr 0.8fr;
-      gap: 10px;
-      align-items: end;
-      margin-bottom: 12px;
-    }
-
-    @media (max-width: 680px) {
-      .person-top { grid-template-columns: 1fr; }
-    }
-
-    .table-wrap {
-      width: 100%;
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: white;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 720px;
-    }
-
-    th, td {
-      border-bottom: 1px solid #eee5d8;
-      padding: 10px;
-      text-align: left;
-      vertical-align: middle;
-      font-size: 14px;
-    }
-
-    th {
-      background: #fff6ea;
-      color: #5b4d3f;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    tr:last-child td { border-bottom: 0; }
-
-    td input {
-      padding: 8px 9px;
-      border-radius: 10px;
-      min-width: 86px;
-    }
-
-    .date-input { min-width: 60px; max-width: 70px; }
-
-    .num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    .status-ok { color: var(--green); font-weight: 800; }
-    .status-warn { color: var(--red); font-weight: 800; }
-
-    .summary-cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin: 14px 0;
-    }
-
-    @media (max-width: 680px) {
-      .summary-cards { grid-template-columns: 1fr; }
-    }
-
-    .metric {
-      background: #fffdf8;
-      border: 1px solid var(--line);
-      border-radius: 15px;
-      padding: 14px;
-    }
-
-    .metric .label {
       color: var(--muted);
       font-size: 13px;
-      font-weight: 700;
     }
 
-    .metric .value {
-      margin-top: 4px;
-      font-size: 28px;
-      font-weight: 900;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .metric.green .value { color: var(--green); }
-    .metric.red .value { color: var(--red); }
-    .metric.blue .value { color: var(--blue); }
-
-    .summary-table {
-      min-width: 620px;
-    }
-
-    .toast {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      background: #25211d;
-      color: white;
-      padding: 12px 14px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      display: none;
-      z-index: 20;
-      max-width: 360px;
-      line-height: 1.4;
-    }
-
-    .hidden { display: none !important; }
-
-    .hint {
-      border-left: 4px solid var(--brand);
-      padding: 10px 12px;
-      background: #fff5e9;
-      border-radius: 12px;
-      color: #5a4635;
-      line-height: 1.55;
-      font-size: 14px;
-      margin-top: 12px;
-    }
-
-    .ocr-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .loading {
-      display: none;
-      color: var(--brand-dark);
+    summary {
+      cursor: pointer;
       font-weight: 800;
-      margin-top: 10px;
+      color: #6f6255;
     }
 
-    .copy-cell {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: flex-end;
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #fff8ee;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      max-height: 220px;
+      overflow: auto;
+      font-size: 12px;
     }
 
-    .sample-note {
-      color: #6e6257;
-      font-size: 13px;
-      margin-top: 8px;
-      line-height: 1.5;
-    }
-
-    .footer-note {
+    .footer {
+      margin-top: 14px;
       color: var(--muted);
       font-size: 12px;
       line-height: 1.6;
-      padding: 0 4px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="title-row">
-      <div>
-        <h1>打卡表加班 / 遲到計算器</h1>
-        <p class="subtitle">依 AMANO 打卡表的機器打印時間計算：平日前 2H、第 3H 起、遲到分鐘與遲到費。藍筆備註、小計、年假、公半等手寫註記不納入計算。</p>
+  <main class="app">
+    <section class="hero">
+      <h1>打卡表快速計算</h1>
+      <p class="sub">拍照或上傳打卡表，系統只讀機器打印時間，直接輸出姓名、平日前 2H、第 3H 起、遲到分鐘。</p>
+    </section>
+
+    <section class="card">
+      <div class="actions">
+        <label class="file-btn">
+          📷 拍照
+          <input id="cameraInput" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <label class="file-btn">
+          🖼️ 上傳照片
+          <input id="uploadInput" type="file" accept="image/*">
+        </label>
       </div>
-      <div class="pill">加班基準 18:00｜遲到基準 08:00</div>
+
+      <div class="rule">
+        規則：遲到超過 08:00 逐分鐘計；加班從 18:00 後開始，15–44 分 = 0.5H，45–59 分 = 1H；每日先拆前 2H / 第 3H 起。藍筆數字與手寫小計不納入。
+      </div>
+
+      <div id="preview" class="preview">
+        <img id="previewImg" alt="打卡表照片">
+      </div>
+
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div id="progress" class="progress">分析中...</div>
+      </div>
+
+      <div id="error" class="error"></div>
+
+      <div id="result" class="result">
+        <div class="name">
+          <span id="nameText">姓名：—</span>
+          <span id="confidenceText" class="badge">OCR</span>
+        </div>
+
+        <div class="numbers">
+          <div class="num-card">
+            <div class="label">平日前 2H</div>
+            <div id="first2Text" class="value green">0</div>
+          </div>
+
+          <div class="num-card">
+            <div class="label">第 3H 起</div>
+            <div id="after2Text" class="value blue">0</div>
+          </div>
+
+          <div class="num-card">
+            <div class="label">遲到分鐘</div>
+            <div id="lateText" class="value red">0</div>
+          </div>
+        </div>
+
+        <div class="copy-row">
+          <button id="copyBtn" type="button">複製結果</button>
+          <button id="resetBtn" type="button" class="secondary">重新拍 / 上傳</button>
+        </div>
+
+        <details>
+          <summary>查看系統讀到的時間</summary>
+          <pre id="debugText"></pre>
+        </details>
+      </div>
+    </section>
+
+    <div class="footer">
+      純前端版本會受到照片角度、反光、打印淡墨影響。若讀不到姓名或時間，請重新拍清楚一點、讓整張卡片填滿畫面。
     </div>
-  </header>
-
-  <main>
-    <section class="grid">
-      <div class="panel">
-        <div class="panel-header">
-          <h2>1. 上傳 / 拍照參考</h2>
-          <span class="small">先看圖，再輸入或 OCR 輔助</span>
-        </div>
-        <div class="panel-body">
-          <div class="upload-box">
-            <input id="imageInput" type="file" accept="image/*" capture="environment" />
-            <div class="small" style="margin-top: 8px;">手機可直接拍照。OCR 只作輔助，最後仍以你確認的時間表為準。</div>
-          </div>
-
-          <div id="previewWrap" class="preview-wrap">
-            <img id="previewImage" alt="打卡表預覽" />
-          </div>
-
-          <div class="button-row">
-            <button class="blue" id="runOcrBtn" type="button">OCR 輔助讀取</button>
-            <button class="secondary" id="clearImageBtn" type="button">清除圖片</button>
-          </div>
-          <div id="ocrLoading" class="loading">OCR 讀取中，請稍等...</div>
-
-          <div class="hint">
-            目前版本的重點是「計算邏輯正確」。OCR 會嘗試抓姓名與時間，但拍照角度、反光、手寫字都會影響結果，所以建議先用「批次貼上」確認每日時間。
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header">
-          <h2>2. 計算規則</h2>
-          <span class="small">可依公司規則調整</span>
-        </div>
-        <div class="panel-body">
-          <div class="rule-grid">
-            <div>
-              <label for="workStart">正常上班時間</label>
-              <input id="workStart" type="time" value="08:00" />
-            </div>
-            <div>
-              <label for="otStart">加班開始時間</label>
-              <input id="otStart" type="time" value="18:00" />
-            </div>
-            <div>
-              <label for="lateFeePerMinute">遲到費：每分鐘扣款</label>
-              <input id="lateFeePerMinute" type="number" min="0" step="1" placeholder="例如 5；不填則只算分鐘" />
-            </div>
-            <div>
-              <label for="roundMode">加班進位規則</label>
-              <select id="roundMode">
-                <option value="15-45" selected>15 分算 0.5H，45 分算 1H</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="hint">
-            加班會先按「每天」計算，再拆成「前 2H」與「第 3H 起」。例如某天加班 2.5H，會算成前 2H = 2、第 3H 起 = 0.5。
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-header">
-        <h2>3. 員工與每日打卡時間</h2>
-        <div class="button-row" style="margin-top: 0;">
-          <button class="secondary" id="loadSampleBtn" type="button">載入範例</button>
-          <button id="addPersonBtn" type="button">新增員工</button>
-        </div>
-      </div>
-      <div class="panel-body">
-        <div class="ocr-grid">
-          <div>
-            <label for="batchInput">批次貼上 / OCR 文字整理區</label>
-            <textarea id="batchInput" placeholder="格式範例：
-姓名：陳秀如
-卡號：10
-18 07:29 18:22
-19 07:34 18:59
-20 07:28 18:00
-
-也可以只貼：
-18 7:29 18:22
-19 7:34 18:59"></textarea>
-            <div class="button-row">
-              <button id="parseBatchBtn" type="button">用上方文字建立員工</button>
-              <button class="ghost" id="clearBatchBtn" type="button">清空文字</button>
-            </div>
-            <div class="sample-note">
-              一列一日：日期、上班、下班。系統會忽略藍筆寫的 0.5 / 1 / 年假 / 公半等文字。
-            </div>
-          </div>
-        </div>
-
-        <div id="peopleContainer" style="margin-top: 18px;"></div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-header">
-        <h2>4. 薪資輸入結果</h2>
-        <div class="button-row" style="margin-top: 0;">
-          <button class="secondary" id="copySummaryBtn" type="button">複製總表</button>
-          <button class="secondary" id="downloadCsvBtn" type="button">下載 CSV</button>
-          <button class="danger" id="clearAllBtn" type="button">全部清除</button>
-        </div>
-      </div>
-      <div class="panel-body">
-        <div class="summary-cards">
-          <div class="metric green">
-            <div class="label">平日前 2H 合計</div>
-            <div id="metricFirst2" class="value">0</div>
-          </div>
-          <div class="metric blue">
-            <div class="label">平日第 3H 起合計</div>
-            <div id="metricAfter2" class="value">0</div>
-          </div>
-          <div class="metric red">
-            <div class="label">遲到分鐘合計</div>
-            <div id="metricLate" class="value">0</div>
-          </div>
-        </div>
-
-        <div class="table-wrap">
-          <table class="summary-table">
-            <thead>
-              <tr>
-                <th>卡號</th>
-                <th>姓名</th>
-                <th class="num">平日前 2H</th>
-                <th class="num">平日第 3H 起</th>
-                <th class="num">遲到分鐘</th>
-                <th class="num">遲到費</th>
-                <th>複製</th>
-              </tr>
-            </thead>
-            <tbody id="summaryBody">
-              <tr><td colspan="7" class="small">尚未輸入資料</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <p class="footer-note">
-      注意：本工具是計算與輸入輔助，最終仍需由公司確認工時計算規則、休息日/例假日/國定假日分類與勞基法適用條件。
-    </p>
   </main>
-
-  <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script>
-    const state = {
-      people: []
+    const config = {
+      workStart: '08:00',
+      overtimeStart: '18:00'
     };
 
-    const els = {
-      imageInput: document.getElementById('imageInput'),
-      previewWrap: document.getElementById('previewWrap'),
-      previewImage: document.getElementById('previewImage'),
-      runOcrBtn: document.getElementById('runOcrBtn'),
-      clearImageBtn: document.getElementById('clearImageBtn'),
-      ocrLoading: document.getElementById('ocrLoading'),
-      workStart: document.getElementById('workStart'),
-      otStart: document.getElementById('otStart'),
-      lateFeePerMinute: document.getElementById('lateFeePerMinute'),
-      batchInput: document.getElementById('batchInput'),
-      parseBatchBtn: document.getElementById('parseBatchBtn'),
-      clearBatchBtn: document.getElementById('clearBatchBtn'),
-      peopleContainer: document.getElementById('peopleContainer'),
-      addPersonBtn: document.getElementById('addPersonBtn'),
-      loadSampleBtn: document.getElementById('loadSampleBtn'),
-      summaryBody: document.getElementById('summaryBody'),
-      metricFirst2: document.getElementById('metricFirst2'),
-      metricAfter2: document.getElementById('metricAfter2'),
-      metricLate: document.getElementById('metricLate'),
-      copySummaryBtn: document.getElementById('copySummaryBtn'),
-      downloadCsvBtn: document.getElementById('downloadCsvBtn'),
-      clearAllBtn: document.getElementById('clearAllBtn'),
-      toast: document.getElementById('toast')
-    };
+    let lastResultText = '';
 
-    function toast(message) {
-      els.toast.textContent = message;
-      els.toast.style.display = 'block';
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => {
-        els.toast.style.display = 'none';
-      }, 2600);
+    const cameraInput = document.getElementById('cameraInput');
+    const uploadInput = document.getElementById('uploadInput');
+    const preview = document.getElementById('preview');
+    const previewImg = document.getElementById('previewImg');
+    const loading = document.getElementById('loading');
+    const progress = document.getElementById('progress');
+    const errorBox = document.getElementById('error');
+    const resultBox = document.getElementById('result');
+    const nameText = document.getElementById('nameText');
+    const confidenceText = document.getElementById('confidenceText');
+    const first2Text = document.getElementById('first2Text');
+    const after2Text = document.getElementById('after2Text');
+    const lateText = document.getElementById('lateText');
+    const debugText = document.getElementById('debugText');
+    const copyBtn = document.getElementById('copyBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    cameraInput.addEventListener('change', handleFile);
+    uploadInput.addEventListener('change', handleFile);
+    copyBtn.addEventListener('click', copyResult);
+    resetBtn.addEventListener('click', resetApp);
+
+    function resetApp() {
+      cameraInput.value = '';
+      uploadInput.value = '';
+      preview.style.display = 'none';
+      resultBox.style.display = 'none';
+      errorBox.style.display = 'none';
+      loading.style.display = 'none';
+      previewImg.removeAttribute('src');
+      lastResultText = '';
     }
 
-    function uid() {
-      return 'p_' + Math.random().toString(36).slice(2, 10);
+    async function handleFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      resetStateForNewImage();
+
+      const imageUrl = await fileToDataUrl(file);
+      previewImg.src = imageUrl;
+      preview.style.display = 'block';
+
+      await analyzeImage(imageUrl);
     }
 
-    function padTime(t) {
-      if (!t) return '';
-      const match = String(t).trim().match(/^(\d{1,2})[:：](\d{1,2})$/);
-      if (!match) return '';
-      const h = String(Math.min(23, Math.max(0, Number(match[1])))).padStart(2, '0');
-      const m = String(Math.min(59, Math.max(0, Number(match[2])))).padStart(2, '0');
-      return `${h}:${m}`;
+    function resetStateForNewImage() {
+      resultBox.style.display = 'none';
+      errorBox.style.display = 'none';
+      loading.style.display = 'block';
+      progress.textContent = '準備分析...';
+      debugText.textContent = '';
+      lastResultText = '';
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function analyzeImage(imageUrl) {
+      if (!window.Tesseract) {
+        showError('OCR 套件沒有載入成功，請確認網路連線後重試。');
+        return;
+      }
+
+      try {
+        const result = await Tesseract.recognize(imageUrl, 'eng+chi_tra', {
+          logger: m => {
+            if (m.status) {
+              const pct = typeof m.progress === 'number' ? ` ${Math.round(m.progress * 100)}%` : '';
+              progress.textContent = `分析中：${m.status}${pct}`;
+            }
+          }
+        });
+
+        const text = result.data.text || '';
+        const confidence = Math.round(result.data.confidence || 0);
+        const parsed = parseTimecardText(text);
+        const calculated = calculate(parsed.rows);
+
+        if (parsed.rows.length === 0) {
+          showError('沒有讀到可用的機器打印時間。請重新拍照，讓打卡時間更清楚、卡片更平整。');
+          debugText.textContent = text.trim();
+          return;
+        }
+
+        showResult(parsed, calculated, confidence, text);
+      } catch (err) {
+        console.error(err);
+        showError('分析失敗。請重新拍照或換一張較清楚的圖片。');
+      }
+    }
+
+    function parseTimecardText(rawText) {
+      const text = normalize(rawText);
+      const lines = text.split(/\n+/).map(s => s.trim()).filter(Boolean);
+
+      const name = extractName(lines, text);
+      const rows = extractRows(lines, text);
+
+      return { name, rows };
+    }
+
+    function normalize(text) {
+      return String(text || '')
+        .replace(/：/g, ':')
+        .replace(/[|｜]/g, ' ')
+        .replace(/[，,]/g, ' ')
+        .replace(/[－—–]/g, '-')
+        .replace(/\t/g, ' ')
+        .replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 65248));
+    }
+
+    function extractName(lines, text) {
+      const joined = lines.join(' ');
+
+      const direct = joined.match(/(?:姓名|名)\s*[:：]?\s*([\u4e00-\u9fff]{2,4})/);
+      if (direct) return direct[1];
+
+      // Look for a short Chinese name near the top of the OCR text.
+      const top = lines.slice(0, 8).join(' ');
+      const candidates = [...top.matchAll(/[\u4e00-\u9fff]{2,4}/g)]
+        .map(m => m[0])
+        .filter(w => !/(打卡|考勤|月份|姓名|卡號|公司|部門|上班|下班|時分|日期|AMANO)/.test(w));
+
+      return candidates[0] || '未讀到姓名';
+    }
+
+    function extractRows(lines, fullText) {
+      const rows = [];
+
+      for (const line of lines) {
+        if (/(姓名|卡號|AMANO|考勤|月份|日期|年假|公半|請假|加班|遲到|合計|總計)/i.test(line)) continue;
+
+        const times = extractTimes(line);
+        if (times.length < 2) continue;
+
+        const day = extractDay(line);
+        rows.push({
+          date: day || '',
+          clockIn: times[0],
+          clockOut: times[times.length - 1],
+          source: line
+        });
+      }
+
+      if (rows.length > 0) return dedupeRows(rows);
+
+      // Fallback: scan tokens across the whole OCR result.
+      const tokens = fullText.match(/\b(?:[1-9]|[12]\d|3[01]|[0-2]?\d[:.：][0-5]\d)\b/g) || [];
+      const fallback = [];
+      for (let i = 0; i < tokens.length - 2; i++) {
+        const d = tokens[i];
+        const t1 = tokens[i + 1];
+        const t2 = tokens[i + 2];
+
+        if (/^([1-9]|[12]\d|3[01])$/.test(d) && isTime(t1) && isTime(t2)) {
+          fallback.push({
+            date: d,
+            clockIn: cleanTime(t1),
+            clockOut: cleanTime(t2),
+            source: `${d} ${t1} ${t2}`
+          });
+          i += 2;
+        }
+      }
+
+      return dedupeRows(fallback);
+    }
+
+    function extractTimes(line) {
+      const matches = [...line.matchAll(/\b([0-2]?\d)[:.：]([0-5]\d)\b/g)];
+      return matches
+        .map(m => cleanTime(`${m[1]}:${m[2]}`))
+        .filter(Boolean)
+        .filter(t => {
+          const min = timeToMinutes(t);
+          // Work card useful punches are usually 05:00-23:59.
+          return min >= 300 && min <= 1439;
+        });
+    }
+
+    function extractDay(line) {
+      const match = line.match(/(?:^|\s)([1-9]|[12]\d|3[01])(?:\s|日|號|$)/);
+      return match ? match[1] : '';
+    }
+
+    function isTime(value) {
+      return /^[0-2]?\d[:.：][0-5]\d$/.test(value);
+    }
+
+    function cleanTime(value) {
+      const m = String(value || '').trim().match(/^([0-2]?\d)[:.：]([0-5]\d)$/);
+      if (!m) return '';
+      const h = Number(m[1]);
+      const min = Number(m[2]);
+      if (h > 23 || min > 59) return '';
+      return String(h).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+    }
+
+    function dedupeRows(rows) {
+      const seen = new Set();
+      const out = [];
+
+      for (const r of rows) {
+        const key = `${r.date}-${r.clockIn}-${r.clockOut}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(r);
+      }
+
+      return out;
+    }
+
+    function calculate(rows) {
+      let totalFirst2 = 0;
+      let totalAfter2 = 0;
+      let totalLate = 0;
+
+      const breakdown = rows.map(row => {
+        const late = lateMinutes(row.clockIn);
+        const otTotal = overtimeHours(row.clockOut);
+        const first2 = Math.min(otTotal, 2);
+        const after2 = Math.max(0, otTotal - 2);
+
+        totalLate += late;
+        totalFirst2 += first2;
+        totalAfter2 += after2;
+
+        return {
+          ...row,
+          late,
+          overtimeTotal: otTotal,
+          first2,
+          after2
+        };
+      });
+
+      return {
+        first2: totalFirst2,
+        after2: totalAfter2,
+        late: totalLate,
+        breakdown
+      };
+    }
+
+    function lateMinutes(clockIn) {
+      const inMin = timeToMinutes(clockIn);
+      const startMin = timeToMinutes(config.workStart);
+      if (inMin === null || startMin === null) return 0;
+      return Math.max(0, inMin - startMin);
+    }
+
+    function overtimeHours(clockOut) {
+      const outMin = timeToMinutes(clockOut);
+      const startMin = timeToMinutes(config.overtimeStart);
+      if (outMin === null || startMin === null) return 0;
+
+      const raw = Math.max(0, outMin - startMin);
+      const fullHours = Math.floor(raw / 60);
+      const rem = raw % 60;
+
+      if (rem >= 45) return fullHours + 1;
+      if (rem >= 15) return fullHours + 0.5;
+      return fullHours;
     }
 
     function timeToMinutes(t) {
-      const clean = padTime(t);
+      const clean = cleanTime(t);
       if (!clean) return null;
       const [h, m] = clean.split(':').map(Number);
       return h * 60 + m;
     }
 
-    function formatHours(n) {
-      if (!Number.isFinite(n)) return '0';
+    function fmt(n) {
       return Number.isInteger(n) ? String(n) : n.toFixed(1);
     }
 
-    function calculateLateMinutes(clockIn) {
-      const inMin = timeToMinutes(clockIn);
-      const startMin = timeToMinutes(els.workStart.value);
-      if (inMin === null || startMin === null) return null;
-      return Math.max(0, inMin - startMin);
+    function showResult(parsed, calculated, confidence, rawText) {
+      loading.style.display = 'none';
+      errorBox.style.display = 'none';
+
+      nameText.textContent = `姓名：${parsed.name}`;
+      confidenceText.textContent = `OCR 信心 ${confidence}%`;
+      first2Text.textContent = fmt(calculated.first2);
+      after2Text.textContent = fmt(calculated.after2);
+      lateText.textContent = String(calculated.late);
+
+      lastResultText = [
+        parsed.name,
+        `平日前2H：${fmt(calculated.first2)}`,
+        `平日第3H起：${fmt(calculated.after2)}`,
+        `遲到分鐘：${calculated.late}`
+      ].join('\n');
+
+      debugText.textContent =
+        calculated.breakdown.map(r =>
+          `${r.date || '?'}｜${r.clockIn} - ${r.clockOut}｜前2H ${fmt(r.first2)}｜第3H起 ${fmt(r.after2)}｜遲到 ${r.late}分`
+        ).join('\n') +
+        '\n\n--- OCR 原始文字 ---\n' +
+        rawText.trim();
+
+      resultBox.style.display = 'block';
     }
 
-    function roundOvertimeMinutesToHours(minutes) {
-      if (!Number.isFinite(minutes) || minutes <= 0) return 0;
-
-      const fullHours = Math.floor(minutes / 60);
-      const remaining = minutes % 60;
-
-      if (remaining >= 45) return fullHours + 1;
-      if (remaining >= 15) return fullHours + 0.5;
-      return fullHours;
+    function showError(message) {
+      loading.style.display = 'none';
+      resultBox.style.display = 'none';
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
     }
 
-    function calculateOvertime(clockOut) {
-      const outMin = timeToMinutes(clockOut);
-      const otStartMin = timeToMinutes(els.otStart.value);
-      if (outMin === null || otStartMin === null) return { rawMinutes: null, total: null, first2: null, after2: null };
-
-      const raw = Math.max(0, outMin - otStartMin);
-      const total = roundOvertimeMinutesToHours(raw);
-      const first2 = Math.min(total, 2);
-      const after2 = Math.max(0, total - 2);
-
-      return { rawMinutes: raw, total, first2, after2 };
-    }
-
-    function calculatePerson(person) {
-      let first2 = 0;
-      let after2 = 0;
-      let late = 0;
-      let rows = [];
-
-      for (const row of person.rows) {
-        const clockIn = padTime(row.clockIn);
-        const clockOut = padTime(row.clockOut);
-        const lateMin = calculateLateMinutes(clockIn);
-        const ot = calculateOvertime(clockOut);
-
-        if (lateMin !== null) late += lateMin;
-        if (ot.first2 !== null) first2 += ot.first2;
-        if (ot.after2 !== null) after2 += ot.after2;
-
-        rows.push({
-          ...row,
-          clockIn,
-          clockOut,
-          lateMinutes: lateMin,
-          rawOtMinutes: ot.rawMinutes,
-          overtimeTotal: ot.total,
-          first2: ot.first2,
-          after2: ot.after2
-        });
-      }
-
-      return { first2, after2, late, rows };
-    }
-
-    function newPerson({ employeeNo = '', name = '', rows = [] } = {}) {
-      return {
-        id: uid(),
-        employeeNo,
-        name,
-        rows: rows.map(r => ({
-          id: uid(),
-          date: r.date || '',
-          clockIn: padTime(r.clockIn || ''),
-          clockOut: padTime(r.clockOut || '')
-        }))
-      };
-    }
-
-    function addEmptyRow(person) {
-      person.rows.push({ id: uid(), date: '', clockIn: '', clockOut: '' });
-      render();
-    }
-
-    function deleteRow(personId, rowId) {
-      const person = state.people.find(p => p.id === personId);
-      if (!person) return;
-      person.rows = person.rows.filter(r => r.id !== rowId);
-      render();
-    }
-
-    function deletePerson(personId) {
-      state.people = state.people.filter(p => p.id !== personId);
-      render();
-    }
-
-    function updatePerson(personId, field, value) {
-      const person = state.people.find(p => p.id === personId);
-      if (!person) return;
-      person[field] = value;
-      renderSummaryOnly();
-    }
-
-    function updateRow(personId, rowId, field, value) {
-      const person = state.people.find(p => p.id === personId);
-      if (!person) return;
-      const row = person.rows.find(r => r.id === rowId);
-      if (!row) return;
-      row[field] = value;
-      renderSummaryOnly();
-      renderPersonCalculations(person);
-    }
-
-    function render() {
-      renderPeople();
-      renderSummaryOnly();
-    }
-
-    function renderPeople() {
-      els.peopleContainer.innerHTML = '';
-
-      if (state.people.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'hint';
-        empty.textContent = '請新增員工，或用批次貼上建立一位員工。';
-        els.peopleContainer.appendChild(empty);
-        return;
-      }
-
-      for (const person of state.people) {
-        const calc = calculatePerson(person);
-
-        const card = document.createElement('div');
-        card.className = 'person-card';
-        card.dataset.personId = person.id;
-
-        card.innerHTML = `
-          <div class="person-top">
-            <div>
-              <label>卡號</label>
-              <input data-role="employeeNo" value="${escapeHtml(person.employeeNo)}" placeholder="例如 10" />
-            </div>
-            <div>
-              <label>姓名</label>
-              <input data-role="name" value="${escapeHtml(person.name)}" placeholder="例如 陳秀如" />
-            </div>
-            <div class="button-row" style="margin-top:0; justify-content:flex-end;">
-              <button type="button" class="danger" data-role="deletePerson">刪除</button>
-            </div>
-          </div>
-
-          <div class="summary-cards">
-            <div class="metric green">
-              <div class="label">平日前 2H</div>
-              <div class="value" data-calc="first2">${formatHours(calc.first2)}</div>
-            </div>
-            <div class="metric blue">
-              <div class="label">第 3H 起</div>
-              <div class="value" data-calc="after2">${formatHours(calc.after2)}</div>
-            </div>
-            <div class="metric red">
-              <div class="label">遲到分鐘</div>
-              <div class="value" data-calc="late">${calc.late}</div>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>日期</th>
-                  <th>上班</th>
-                  <th>下班</th>
-                  <th class="num">遲到分鐘</th>
-                  <th class="num">加班總時數</th>
-                  <th class="num">前 2H</th>
-                  <th class="num">第 3H 起</th>
-                  <th>狀態</th>
-                  <th>刪除</th>
-                </tr>
-              </thead>
-              <tbody data-role="rows"></tbody>
-            </table>
-          </div>
-
-          <div class="button-row">
-            <button type="button" class="secondary" data-role="addRow">新增日期</button>
-          </div>
-        `;
-
-        els.peopleContainer.appendChild(card);
-
-        const rowBody = card.querySelector('[data-role="rows"]');
-        renderRows(rowBody, person, calc.rows);
-
-        card.querySelector('[data-role="employeeNo"]').addEventListener('input', e => updatePerson(person.id, 'employeeNo', e.target.value));
-        card.querySelector('[data-role="name"]').addEventListener('input', e => updatePerson(person.id, 'name', e.target.value));
-        card.querySelector('[data-role="deletePerson"]').addEventListener('click', () => deletePerson(person.id));
-        card.querySelector('[data-role="addRow"]').addEventListener('click', () => addEmptyRow(person));
-      }
-    }
-
-    function renderRows(rowBody, person, calculatedRows) {
-      rowBody.innerHTML = '';
-
-      if (person.rows.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="9" class="small">尚未輸入每日時間</td>';
-        rowBody.appendChild(tr);
-        return;
-      }
-
-      for (const row of calculatedRows) {
-        const tr = document.createElement('tr');
-        const isMissing = !row.clockIn || !row.clockOut || !row.date;
-        const status = isMissing ? '<span class="status-warn">需確認</span>' : '<span class="status-ok">OK</span>';
-
-        tr.innerHTML = `
-          <td><input class="date-input" type="number" min="1" max="31" value="${escapeHtml(row.date)}" data-field="date" /></td>
-          <td><input type="time" value="${escapeHtml(row.clockIn)}" data-field="clockIn" /></td>
-          <td><input type="time" value="${escapeHtml(row.clockOut)}" data-field="clockOut" /></td>
-          <td class="num">${row.lateMinutes === null ? '-' : row.lateMinutes}</td>
-          <td class="num">${row.overtimeTotal === null ? '-' : formatHours(row.overtimeTotal)}</td>
-          <td class="num">${row.first2 === null ? '-' : formatHours(row.first2)}</td>
-          <td class="num">${row.after2 === null ? '-' : formatHours(row.after2)}</td>
-          <td>${status}</td>
-          <td><button type="button" class="ghost" data-role="deleteRow">刪除</button></td>
-        `;
-
-        tr.querySelectorAll('input').forEach(input => {
-          input.addEventListener('input', e => updateRow(person.id, row.id, e.target.dataset.field, e.target.value));
-          input.addEventListener('blur', e => {
-            if (e.target.dataset.field === 'clockIn' || e.target.dataset.field === 'clockOut') {
-              e.target.value = padTime(e.target.value);
-              updateRow(person.id, row.id, e.target.dataset.field, e.target.value);
-            }
-          });
-        });
-
-        tr.querySelector('[data-role="deleteRow"]').addEventListener('click', () => deleteRow(person.id, row.id));
-
-        rowBody.appendChild(tr);
-      }
-    }
-
-    function renderPersonCalculations(person) {
-      const card = els.peopleContainer.querySelector(`[data-person-id="${person.id}"]`);
-      if (!card) return;
-
-      const calc = calculatePerson(person);
-      card.querySelector('[data-calc="first2"]').textContent = formatHours(calc.first2);
-      card.querySelector('[data-calc="after2"]').textContent = formatHours(calc.after2);
-      card.querySelector('[data-calc="late"]').textContent = calc.late;
-
-      const tbody = card.querySelector('[data-role="rows"]');
-      renderRows(tbody, person, calc.rows);
-    }
-
-    function renderSummaryOnly() {
-      let grandFirst2 = 0;
-      let grandAfter2 = 0;
-      let grandLate = 0;
-
-      els.summaryBody.innerHTML = '';
-
-      if (state.people.length === 0) {
-        els.summaryBody.innerHTML = '<tr><td colspan="7" class="small">尚未輸入資料</td></tr>';
-        els.metricFirst2.textContent = '0';
-        els.metricAfter2.textContent = '0';
-        els.metricLate.textContent = '0';
-        return;
-      }
-
-      const feePerMin = Number(els.lateFeePerMinute.value || 0);
-
-      for (const person of state.people) {
-        const calc = calculatePerson(person);
-        grandFirst2 += calc.first2;
-        grandAfter2 += calc.after2;
-        grandLate += calc.late;
-
-        const lateFee = feePerMin > 0 ? calc.late * feePerMin : '';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${escapeHtml(person.employeeNo)}</td>
-          <td>${escapeHtml(person.name)}</td>
-          <td class="num">${formatHours(calc.first2)}</td>
-          <td class="num">${formatHours(calc.after2)}</td>
-          <td class="num">${calc.late}</td>
-          <td class="num">${lateFee === '' ? '-' : lateFee.toLocaleString()}</td>
-          <td>
-            <div class="copy-cell">
-              <button type="button" class="secondary" data-copy="${escapeAttr(summaryLine(person, calc, lateFee))}">複製</button>
-            </div>
-          </td>
-        `;
-        els.summaryBody.appendChild(tr);
-
-        tr.querySelector('button').addEventListener('click', e => {
-          copyText(e.target.dataset.copy);
-          toast('已複製此員工結果');
-        });
-      }
-
-      els.metricFirst2.textContent = formatHours(grandFirst2);
-      els.metricAfter2.textContent = formatHours(grandAfter2);
-      els.metricLate.textContent = grandLate;
-    }
-
-    function summaryLine(person, calc, lateFee) {
-      return [
-        person.employeeNo || '',
-        person.name || '',
-        formatHours(calc.first2),
-        formatHours(calc.after2),
-        calc.late,
-        lateFee === '' ? '' : lateFee
-      ].join('\t');
-    }
-
-    function summaryTsv() {
-      const feePerMin = Number(els.lateFeePerMinute.value || 0);
-      const lines = [['卡號', '姓名', '平日前2H', '平日第3H起', '遲到分鐘', '遲到費'].join('\t')];
-
-      for (const person of state.people) {
-        const calc = calculatePerson(person);
-        const lateFee = feePerMin > 0 ? calc.late * feePerMin : '';
-        lines.push(summaryLine(person, calc, lateFee));
-      }
-      return lines.join('\n');
-    }
-
-    function csvEscape(v) {
-      const s = String(v ?? '');
-      if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-      return s;
-    }
-
-    function downloadCsv() {
-      const feePerMin = Number(els.lateFeePerMinute.value || 0);
-      const rows = [['卡號', '姓名', '平日前2H', '平日第3H起', '遲到分鐘', '遲到費']];
-
-      for (const person of state.people) {
-        const calc = calculatePerson(person);
-        rows.push([
-          person.employeeNo || '',
-          person.name || '',
-          formatHours(calc.first2),
-          formatHours(calc.after2),
-          calc.late,
-          feePerMin > 0 ? calc.late * feePerMin : ''
-        ]);
-      }
-
-      const csv = rows.map(r => r.map(csvEscape).join(',')).join('\n');
-      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = '打卡表加班遲到計算.csv';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    async function copyText(text) {
+    async function copyResult() {
+      if (!lastResultText) return;
       try {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(lastResultText);
       } catch {
         const ta = document.createElement('textarea');
-        ta.value = text;
+        ta.value = lastResultText;
         document.body.appendChild(ta);
         ta.select();
         document.execCommand('copy');
         ta.remove();
       }
+      copyBtn.textContent = '已複製';
+      setTimeout(() => copyBtn.textContent = '複製結果', 1200);
     }
-
-    function parseBatchText(text) {
-      const normalized = text
-        .replace(/：/g, ':')
-        .replace(/[－—–]/g, '-')
-        .replace(/[，,]/g, ' ')
-        .replace(/\t/g, ' ');
-
-      let name = '';
-      let employeeNo = '';
-
-      const nameMatch = normalized.match(/(?:姓名|name)\s*[:：]?\s*([\u4e00-\u9fffA-Za-z]{2,8})/i);
-      if (nameMatch) name = nameMatch[1].trim();
-
-      const noMatch = normalized.match(/(?:卡號|No\.?|編號|employee)\s*[:：]?\s*(\d{1,4})/i);
-      if (noMatch) employeeNo = noMatch[1].trim();
-
-      const rows = [];
-      const lines = normalized.split(/\n+/);
-
-      for (const line of lines) {
-        const clean = line.trim();
-        if (!clean) continue;
-        if (/姓名|卡號|No\.?|AMANO|考勤|年假|公半/.test(clean)) continue;
-
-        const times = [...clean.matchAll(/\b([01]?\d|2[0-3])[:：]([0-5]\d)\b/g)].map(m => `${m[1]}:${m[2]}`);
-        const dayMatch = clean.match(/(?:^|\s)([1-9]|[12]\d|3[01])(?:\s|日|號|$)/);
-
-        if (dayMatch && times.length >= 2) {
-          rows.push({
-            date: dayMatch[1],
-            clockIn: times[0],
-            clockOut: times[times.length - 1]
-          });
-        }
-      }
-
-      // Fallback: if no row-like lines are found, try sequence pattern:
-      // 18 07:29 18:22 19 07:34 18:59
-      if (rows.length === 0) {
-        const tokens = normalized.match(/\b(?:[1-9]|[12]\d|3[01]|[01]?\d[:：][0-5]\d|2[0-3][:：][0-5]\d)\b/g) || [];
-        for (let i = 0; i < tokens.length - 2; i++) {
-          const d = tokens[i];
-          const t1 = tokens[i + 1];
-          const t2 = tokens[i + 2];
-          if (/^([1-9]|[12]\d|3[01])$/.test(d) && /[:：]/.test(t1) && /[:：]/.test(t2)) {
-            rows.push({ date: d, clockIn: t1, clockOut: t2 });
-            i += 2;
-          }
-        }
-      }
-
-      return { employeeNo, name, rows };
-    }
-
-    function loadSamples() {
-      state.people = [
-        newPerson({
-          employeeNo: '3',
-          name: '李倞捷',
-          rows: [
-            { date: 18, clockIn: '07:54', clockOut: '17:05' },
-            { date: 19, clockIn: '07:49', clockOut: '17:05' },
-            { date: 20, clockIn: '07:53', clockOut: '17:07' },
-            { date: 21, clockIn: '07:33', clockOut: '17:03' },
-            { date: 22, clockIn: '07:54', clockOut: '17:04' },
-            { date: 25, clockIn: '07:52', clockOut: '17:06' },
-            { date: 26, clockIn: '07:53', clockOut: '17:08' },
-            { date: 27, clockIn: '07:53', clockOut: '17:07' },
-            { date: 28, clockIn: '07:55', clockOut: '17:00' },
-            { date: 29, clockIn: '08:05', clockOut: '17:07' }
-          ]
-        }),
-        newPerson({
-          employeeNo: '10',
-          name: '陳秀如',
-          rows: [
-            { date: 18, clockIn: '07:29', clockOut: '18:22' },
-            { date: 19, clockIn: '07:34', clockOut: '18:59' },
-            { date: 20, clockIn: '07:28', clockOut: '18:00' },
-            { date: 21, clockIn: '07:34', clockOut: '17:37' },
-            { date: 25, clockIn: '07:28', clockOut: '19:26' },
-            { date: 26, clockIn: '07:28', clockOut: '18:57' },
-            { date: 27, clockIn: '07:31', clockOut: '18:09' },
-            { date: 29, clockIn: '07:30', clockOut: '19:34' }
-          ]
-        })
-      ];
-      render();
-      toast('已載入範例資料');
-    }
-
-    async function runOcr() {
-      if (!els.previewImage.src) {
-        toast('請先上傳或拍攝打卡表照片');
-        return;
-      }
-
-      if (!window.Tesseract) {
-        toast('OCR 套件尚未載入，請確認網路連線');
-        return;
-      }
-
-      els.ocrLoading.style.display = 'block';
-      els.runOcrBtn.disabled = true;
-
-      try {
-        const result = await Tesseract.recognize(els.previewImage.src, 'eng+chi_tra', {
-          logger: m => {
-            if (m.status && m.progress) {
-              els.ocrLoading.textContent = `OCR 讀取中：${m.status} ${Math.round(m.progress * 100)}%`;
-            }
-          }
-        });
-
-        const raw = result.data.text || '';
-        els.batchInput.value = raw.trim();
-
-        const parsed = parseBatchText(raw);
-        const hint = [];
-        if (parsed.name) hint.push(`姓名：${parsed.name}`);
-        if (parsed.employeeNo) hint.push(`卡號：${parsed.employeeNo}`);
-        if (parsed.rows.length) hint.push(`抓到 ${parsed.rows.length} 筆可能時間列`);
-        toast(hint.length ? `OCR 完成：${hint.join('，')}。請先檢查文字再建立。` : 'OCR 完成，但需要你手動整理文字。');
-      } catch (err) {
-        console.error(err);
-        toast('OCR 失敗。可以直接用批次貼上或手動輸入。');
-      } finally {
-        els.ocrLoading.style.display = 'none';
-        els.ocrLoading.textContent = 'OCR 讀取中，請稍等...';
-        els.runOcrBtn.disabled = false;
-      }
-    }
-
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    function escapeAttr(str) {
-      return escapeHtml(str).replace(/'/g, '&#39;');
-    }
-
-    els.imageInput.addEventListener('change', e => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        els.previewImage.src = reader.result;
-        els.previewWrap.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    });
-
-    els.clearImageBtn.addEventListener('click', () => {
-      els.imageInput.value = '';
-      els.previewImage.removeAttribute('src');
-      els.previewWrap.style.display = 'none';
-      toast('已清除圖片');
-    });
-
-    els.runOcrBtn.addEventListener('click', runOcr);
-
-    els.parseBatchBtn.addEventListener('click', () => {
-      const parsed = parseBatchText(els.batchInput.value);
-      if (parsed.rows.length === 0) {
-        toast('沒有抓到每日時間。請用格式：18 07:29 18:22');
-        return;
-      }
-      state.people.push(newPerson(parsed));
-      render();
-      toast(`已建立員工資料，共 ${parsed.rows.length} 筆日期`);
-    });
-
-    els.clearBatchBtn.addEventListener('click', () => {
-      els.batchInput.value = '';
-    });
-
-    els.addPersonBtn.addEventListener('click', () => {
-      state.people.push(newPerson({
-        rows: [{ date: '', clockIn: '', clockOut: '' }]
-      }));
-      render();
-    });
-
-    els.loadSampleBtn.addEventListener('click', loadSamples);
-
-    els.copySummaryBtn.addEventListener('click', async () => {
-      await copyText(summaryTsv());
-      toast('已複製總表，可直接貼到 Excel');
-    });
-
-    els.downloadCsvBtn.addEventListener('click', downloadCsv);
-
-    els.clearAllBtn.addEventListener('click', () => {
-      if (!confirm('確定要清除所有員工資料？')) return;
-      state.people = [];
-      render();
-      toast('已全部清除');
-    });
-
-    [els.workStart, els.otStart, els.lateFeePerMinute].forEach(el => {
-      el.addEventListener('input', render);
-      el.addEventListener('change', render);
-    });
-
-    // Start with one blank person for convenience.
-    state.people.push(newPerson({ rows: [{ date: '', clockIn: '', clockOut: '' }] }));
-    render();
   </script>
 </body>
 </html>
